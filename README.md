@@ -1,0 +1,2 @@
+# mulesoft-project
+training purpose
