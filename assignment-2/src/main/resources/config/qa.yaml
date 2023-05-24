@@ -1,0 +1,13 @@
+http:
+  host : '0.0.0.0'
+  port: '8081'
+
+httprequest1 :
+  host: "v6.exchangerate-api.com"
+  basepath: "/v6"
+  path: "/618cf4150d7ec02007dde68c/latest/USD"
+
+httprequest2 : 
+  host : "api.first.org"
+  basepath : "data/v1"
+  path : "countries"

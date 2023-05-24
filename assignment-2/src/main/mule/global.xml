@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ab6a78de-30e2-4e57-9977-380ac9f1c9a7" >
+		<http:listener-connection host="${http.host}" port="${http.port}" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="f751b8ee-ed85-4bfe-a93a-f12fb99a4fa4" file="config/${env}.yaml" />
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="acee7d62-11b3-4ad4-aed9-ad480a339554" basePath="${httprequest1.basepath}">
+		<http:request-connection protocol="HTTPS" host="${httprequest1.host}" />
+	</http:request-config>
+	<http:request-config name="HTTP_Request_country" doc:name="HTTP Request configuration" doc:id="2b85f4e2-5f30-416d-a142-0f7deda4bc46" basePath="${httprequest2.basepath}" >
+		<http:request-connection host="${httprequest2.host}" />
+	</http:request-config>
+</mule>

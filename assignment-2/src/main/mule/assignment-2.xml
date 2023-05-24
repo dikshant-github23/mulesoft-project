@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<flow name="combinedFlow" doc:id="cb6a7a78-e8d9-4324-8635-167755b14819" >
+		<http:listener doc:name="Listener" doc:id="ae7d8c3c-818e-4eac-848c-cb4d802ff48a" config-ref="HTTP_Listener_config" path="/getcombinedData"/>
+		<logger level="INFO" doc:name="Logger" doc:id="dd540f76-a858-4ccb-bc21-b95b17103bef" message="*** In combined Flow ***"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="a2769b4a-942d-4152-acb6-4cef5ec5e84a" >
+			<route >
+				<flow-ref doc:name="get Exchange Data" doc:id="a3e0d669-f269-41ff-bd66-f211a3966e20" name="exchange-api-call"/>
+			</route>
+			<route >
+				<flow-ref doc:name="get Country Data" doc:id="afb2c387-3492-46b7-8014-955150326876" name="country-api-call"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="0717a9ae-e2a2-4607-840d-09ef04a61f85" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Exchange" : payload[0].payload,
+	"Country" : payload[1].payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5a8c4bce-c0b6-4c65-af11-c579ebfa3925" message="*** End of Combined Flow ***"/>
+	</flow>
+	<flow name="exchange-api-call" doc:id="35e61286-ba66-403b-8445-cc012810abda" >
+		<logger level="INFO" doc:name="Logger" doc:id="b7b7baec-13e5-4081-85fe-31f39ee49fc7" message="*** In exchange api flow ***"/>
+		<http:request method="GET" doc:name="Request" doc:id="8b3dcbc2-37e1-48e6-9700-ed71a56753a3" config-ref="HTTP_Request_configuration" path="${httprequest1.path}"/>
+		<ee:transform doc:name="Transform Message" doc:id="e5aec96b-b44b-48e6-b0ae-3922e50b6589" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="country-api-call" doc:id="de86654a-c199-4c4b-b5b3-956c04920804" >
+		<logger level="INFO" doc:name="Logger" doc:id="b6f9d877-035a-4c7a-98f7-b6437ebf7cb3" message="*** In country api flow ***" />
+		<http:request method="GET" doc:name="Request" doc:id="4ed75fc2-cfe1-42ed-9d50-9af501c8bb9b" config-ref="HTTP_Request_country" path="${httprequest2.path}"/>
+		<ee:transform doc:name="Transform Message" doc:id="5791fe98-4e07-4c9b-94f9-94c927b11da3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>
