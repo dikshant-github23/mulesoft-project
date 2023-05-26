@@ -1,0 +1,7 @@
+%dw 2.0
+
+type auto_d1281d85_b69d_42a1_b02d_466b9da1b6f9_Output_Payload = {|
+  error_description: String | Null, 
+  error_code: Number
+|}
+

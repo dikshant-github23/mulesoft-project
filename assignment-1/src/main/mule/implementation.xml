@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<flow name="insert-department-implementationFlow" doc:id="413332c1-3f80-4da1-b350-948f9c43af6b" >
+		<logger level="INFO" doc:name="Logger" doc:id="a8d358c6-d3b6-4133-9916-6b62cd9c0663" category="*** In Insert Department to MySQL Flow ***"/>
+		<ee:transform doc:name="x-form input to java" doc:id="adc14d30-d0e1-4e79-9e7e-d4761b2116ef" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<db:bulk-insert doc:name="Bulk Insert departments into MySql" doc:id="4331affb-2775-4f58-bbed-1bdff23ac9c5" config-ref="Database_MySql">
+			<db:sql ><![CDATA[Insert into department(dept_name) values(:deptName)]]></db:sql>
+		</db:bulk-insert>
+		<logger level="INFO" doc:name="Logger" doc:id="73f1282a-8f0a-44a1-a77b-208043d4ae24" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="73cbc99c-8d50-459b-a43a-910da5b11c42" type="DB:CONNECTIVITY">
+				<set-variable value="401" doc:name="httpStatus" doc:id="9c73b68b-983d-43a9-a312-08657b74c435" variableName="httpStatus"/>
+				<ee:transform doc:name="Transform Message" doc:id="717db5f3-1df5-459f-a7e2-e8c6be2063d9" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error_code" : vars.httpStatus,
+	"error_description" : error.description
+	
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="insert-student-implementationFlow" doc:id="d1281d85-b69d-42a1-b02d-466b9da1b6f9" >
+		<logger level="INFO" doc:name="Logger" doc:id="6b24e4b1-943f-4e39-90ef-1915893e6d10" message="*** In Insert Student to MySQL Flow ***"/>
+		<db:insert doc:name="Insert into Student MySql" doc:id="a87adb7e-62fc-4995-b190-382cf60018c3" config-ref="Database_MySql" autoGenerateKeys="true">
+			<db:sql ><![CDATA[Insert into student(dept_id,dept_name,stu_fname,stu_lname,stu_age,course_id,course_name) values(:dept_id,:deptName:,:stuFName,:stuLName,:stuAge,:courseid,:courseName)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	dept_id : payload[0].deptid,
+	deptName : payload[0].deptName,
+	stuFName : payload[0].stuFName,
+	stuLName : payload[0].stuLName,
+	stuAge : payload[0].stuAge,
+	courseid : payload[0].courseid,
+	courseName: payload[0].courseName
+}]]]></db:input-parameters>
+			<db:auto-generated-keys-column-indexes />
+			<db:auto-generated-keys-column-names >
+				<db:auto-generated-keys-column-name value="stu_id" />
+			</db:auto-generated-keys-column-names>
+		</db:insert>
+		<set-variable value="#[payload.generatedKeys[0]]" doc:name="StudentId from database" doc:id="682d8c18-1230-4f5b-9e57-aa573a9485fa" variableName="student_Id"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ca777f71-f143-4b92-9bd8-0d445adc8486" message="#[payload]"/>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="971bd445-1e58-4f00-b4d9-06a40a4bed68" type="DB:CONNECTIVITY">
+				<set-variable value="401" doc:name="httpStatus" doc:id="fcea7827-e05c-44c1-9f5a-84e3cb62538e" variableName="httpStatus"/>
+				<ee:transform doc:name="Transform Message" doc:id="01ab4317-29f9-477f-80b8-e467653620a9" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error_code" : vars.httpStatus,
+	"error_description" : error.description
+	
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables >
+					</ee:variables>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="get-all-students-implementationFlow" doc:id="690eeaa6-678b-4094-a5f8-23b9367683dc" >
+		<logger level="INFO" doc:name="Logger" doc:id="afdc2aad-0cd3-4d9d-a911-bf6ff29e734c" message="*** In Get Student to MySQL Flow ***" />
+		<db:select doc:name="Get All Students" doc:id="18ae519b-ec33-45c3-98ff-1df940848a46" config-ref="Database_MySql">
+					<db:sql><![CDATA[Select * from student]]></db:sql>
+				</db:select>
+		<ee:transform doc:name="x-form input to JSON" doc:id="2286f6ea-8ca9-4552-9ae8-e0d28781e762" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e668ff25-a4a6-4ac4-bcbc-4b9240cdf673" type="DB:CONNECTIVITY" >
+				<set-variable value="401" doc:name="httpStatus" doc:id="1746b561-2c3f-4bf5-8882-963dc9702109" variableName="httpStatus" />
+				<ee:transform doc:name="Transform Message" doc:id="402daa70-8cf6-4dce-b658-b71d17238621" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error_code" : vars.httpStatus,
+	"error_description" : error.description
+	
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables />
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	<flow name="get-studentsbyId-implementationFlow" doc:id="41cba2fd-a732-43c8-8c7e-59bce0d3c14e" >
+		<logger level="INFO" doc:name="Logger" doc:id="670b7489-c0b9-4fa6-9312-35e1ee8a6718" message="*** In Get Student to MySQL Flow ***" />
+		<set-variable value="#[attributes.uriParams.stuid]" doc:name="Set Student Id" doc:id="577513da-66c9-47c1-a5e2-af3f5a14c947" variableName="stu_id"/>
+		<db:select doc:name="Get Student by Id" doc:id="a057ad0d-8d0d-4261-9f39-8bc874ce9b1f" config-ref="Database_MySql" >
+			<db:sql ><![CDATA[Select * from student where stu_id = :id]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+	id : vars.stu_id
+}]]]></db:input-parameters>
+		</db:select>
+		<validation:is-not-empty-collection doc:name="Is not empty collection" doc:id="64e20d82-c5b0-44a2-adf5-8ecf23620383" message="#['No Data Present for Id :' ++ (vars.stu_id as String)]"/>
+		<ee:transform doc:name="x-form input to JSON" doc:id="3a266c2c-9b5e-4bb3-b408-c6eff555a79f" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="da562dbd-7688-463f-8024-8958e2b56949" type="DB:CONNECTIVITY" >
+				<set-variable value="401" doc:name="httpStatus" doc:id="e507f8af-8aa2-4ca8-9f21-089bbb1eff2e" variableName="httpStatus" />
+				<ee:transform doc:name="Transform Message" doc:id="213d8233-0a2f-4dc6-8ad2-397affc96735" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error_code" : vars.httpStatus,
+	"error_description" : error.description
+	
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables />
+				</ee:transform>
+			</on-error-propagate>
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5aa1ba0a-0717-42cf-b074-5238cd49ce3b" type="VALIDATION:EMPTY_COLLECTION">
+				<set-variable value="200" doc:name="httpStatus" doc:id="cb183221-0a63-4307-b3cf-47b24331ca88" variableName="httpStatus" />
+				<ee:transform doc:name="Transform Message" doc:id="d6f7587f-5bcf-4f60-8b5d-4a7d2eb887bb" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"error_code" : vars.httpStatus,
+	"error_description" : error.description
+	
+}]]></ee:set-payload>
+					</ee:message>
+					<ee:variables />
+				</ee:transform>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+</mule>
