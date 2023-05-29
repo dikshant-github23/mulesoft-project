@@ -1,0 +1,178 @@
+#%RAML 1.0
+title: College-API
+types:
+  department : !include /DataTypes/departmentDataType.raml
+  student : !include /DataTypes/studentdataType.raml
+  staff : !include /DataTypes/staffdataType.raml
+  course : !include /DataTypes/coursedataType.raml
+  training : !include /DataTypes/trainingdataType.raml
+
+/college:
+  description: "college api"
+
+  /departments:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: department[]
+              examples: !include /Examples/Departmentexample.raml
+
+                
+    
+    post:
+      description: "create departments"
+      body:
+        application/json:
+          type: department[]
+          examples: 
+            input : !include /Examples/PostDepartmentexample.raml
+      responses:
+        201:
+          body:
+            application/json:
+              example: "department Successfully Created !"
+
+    /{deptid}:
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                type: department[]
+                examples: !include /Examples/Departmentexample.raml
+                  
+
+  /students:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: student[]
+              example: [{'stuid': 123, 'deptid': 123,'deptName' : 'MBA', 'stuFName': 'ABC', 'stuLName': 'BBC', 'stuAge' : 23,'courseid' : 123, 'courseName' : 'MBA'}]
+              
+    post:
+      description: "create Students"
+      body:
+        application/json:
+          examples: 
+           input : [{'deptid': 123,'deptName' : 'MBA', 'stuFName': 'ABC', 'stuLName': 'BBC', 'stuAge' : 23,'courseid' : 123, 'courseName' : 'MBA'}]
+      responses:
+        201:
+          body:
+            application/json:
+              example: "Student Successfully Created !"
+
+    /{stuid}:
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                example: [{'stuid': 123, 'deptid': 123,'deptName' : 'MBA', 'stuFName': 'ABC', 'stuLName': 'BBC', 'stuAge' : 23,'courseid' : 123, 'courseName' : 'MBA'}]
+
+  /staff:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: staff[]
+              example : [{'staffid': 123, 'deptid': 123, 'staffFName': 'ABC', 'staffLName': 'CBA'}]
+    
+    post:
+      description: "Create Staff"
+      body:
+        application/json:
+          type: staff[]
+          examples: 
+            input : [{'deptid': 123, 'staffFName': 'ABC', 'staffLName': 'CBA'}]
+      responses:
+        201:
+          body:
+            application/json:
+              example: "Staff Successfully Created !"
+                
+
+    /{staffid}:
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                type: staff[]
+                example: [{'staffid': 123, 'deptid': 123, 'staffFName': 'ABC', 'staffLName': 'CBA'}]
+
+  /courses:
+    get:
+      responses:
+        200:
+          body:
+             application/json:
+                  type: course[]
+                  example: [{'courseid': 123, 'courseName': 'MBA'}]
+    
+    post:
+      description: "Create Courses"
+      body:
+        application/json:
+          type: course[]
+          examples: 
+            input : [{'courseName': 'MBA'}]
+      responses:
+        201:
+          body:
+            application/json:
+              example: "Course Successfully Created !"
+    
+    /{courseid}:
+      get:
+        responses:
+          200:
+            body:
+             application/json:
+                  type: course[]
+                  example: [{'courseid': 123, 'courseName': 'MBA'}]
+  
+  /training:
+    get:
+      responses:
+        200:
+          body:
+            application/json:
+              type: training[]
+              example: [{'trainingid': 123, 'trainingName': 'ABC','courseid': 123,'coursename': 'ABC','stuid': 123,'stuFName': 'ABC', 'stuLName':'XYZ'}]
+    post:
+      description: "Create Training"
+      body:
+        application/json:
+          type: training[]
+          examples: 
+            input : [{'trainingName': 'ABC','courseid': 123,'coursename': 'ABC','stuid': 123,'stuFName': 'ABC', 'stuLName':'XYZ'}]
+      responses:
+        201:
+          body:
+            application/json:
+              example: "Training Successfully Created !"
+                
+    
+    /{trainingid}:
+      get:
+        responses:
+          200:
+            body:
+              application/json:
+                type: training[]
+                example: [{'trainingid': 123, 'trainingName': 'ABC','courseid': 123,'coursename': 'ABC','stuid': 123,'stuFName': 'ABC', 'stuLName':'XYZ'}]
+          
+
+            
+            
+
+                                                                                                                                                                                                                                        
+            
+            
+
+          
