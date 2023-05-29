@@ -4,3 +4,8 @@ mysql:
   username: "root"
   password: "admin"
   database: "college_mulesoft"
+  
+sf:
+  user: "dikchauhan@deloitte.com"
+  pass: "Dikshant@salesforce23"
+  token: "EXBC5nsZcKxG9Fbd0Y8OUooFl"

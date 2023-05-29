@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:db="http://www.mulesoft.org/schema/mule/db"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd">
 	<flow name="insert-department-implementationFlow" doc:id="413332c1-3f80-4da1-b350-948f9c43af6b" >
 		<logger level="INFO" doc:name="Logger" doc:id="a8d358c6-d3b6-4133-9916-6b62cd9c0663" category="*** In Insert Department to MySQL Flow ***"/>
 		<ee:transform doc:name="x-form input to java" doc:id="adc14d30-d0e1-4e79-9e7e-d4761b2116ef" >
@@ -45,6 +46,7 @@ output application/json
 		<logger level="INFO" doc:name="Logger" doc:id="6b24e4b1-943f-4e39-90ef-1915893e6d10" message="*** In Insert Student to MySQL Flow ***"/>
 		<db:insert doc:name="Insert into Student MySql" doc:id="a87adb7e-62fc-4995-b190-382cf60018c3" config-ref="Database_MySql" autoGenerateKeys="true">
 			<db:sql ><![CDATA[Insert into student(dept_id,dept_name,stu_fname,stu_lname,stu_age,course_id,course_name) values(:dept_id,:deptName:,:stuFName,:stuLName,:stuAge,:courseid,:courseName)]]></db:sql>
+			<db:parameter-types />
 			<db:input-parameters ><![CDATA[#[{
 	dept_id : payload[0].deptid,
 	deptName : payload[0].deptName,
@@ -64,6 +66,22 @@ output application/json
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="971bd445-1e58-4f00-b4d9-06a40a4bed68" type="DB:CONNECTIVITY">
 				<set-variable value="401" doc:name="httpStatus" doc:id="fcea7827-e05c-44c1-9f5a-84e3cb62538e" variableName="httpStatus"/>
+				<ee:transform doc:name="x-form input" doc:id="a2481a33-fcb8-44a1-ac9a-5153131d063f">
+					<ee:message>
+						
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	source__c: "HTTP/Postman",
+	target__c: "Database/MySql",
+	Mule_Flow_Name__c: flow.name,
+	Error_Code__c: vars.httpStatus,
+	Error_Message__c: error.description
+}]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:create type="Cus_Error_Object__c" doc:name="Create Error Log" doc:id="765481d0-60ad-44bb-a54f-e5644ba41215" config-ref="Salesforce_Config" />
 				<ee:transform doc:name="Transform Message" doc:id="01ab4317-29f9-477f-80b8-e467653620a9" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -97,6 +115,22 @@ payload]]></ee:set-payload>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e668ff25-a4a6-4ac4-bcbc-4b9240cdf673" type="DB:CONNECTIVITY" >
 				<set-variable value="401" doc:name="httpStatus" doc:id="1746b561-2c3f-4bf5-8882-963dc9702109" variableName="httpStatus" />
+				<ee:transform doc:name="x-form input" doc:id="8e1fd2c0-9c16-4023-93f0-1bd4f962756a">
+					<ee:message>
+						
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	source__c: "HTTP/Postman",
+	target__c: "Database/MySql",
+	Mule_Flow_Name__c: flow.name,
+	Error_Code__c: vars.httpStatus,
+	Error_Message__c: error.description
+}]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:create type="Cus_Error_Object__c" doc:name="Create Error Log" doc:id="cb1cc348-612b-4c1b-b69b-d389730a7233" config-ref="Salesforce_Config" />
 				<ee:transform doc:name="Transform Message" doc:id="402daa70-8cf6-4dce-b658-b71d17238621" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -134,6 +168,22 @@ payload]]></ee:set-payload>
 		<error-handler >
 			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="da562dbd-7688-463f-8024-8958e2b56949" type="DB:CONNECTIVITY" >
 				<set-variable value="401" doc:name="httpStatus" doc:id="e507f8af-8aa2-4ca8-9f21-089bbb1eff2e" variableName="httpStatus" />
+				<ee:transform doc:name="x-form input" doc:id="e1bb9c1f-aa7d-40c8-b9b5-e04ee38f3d27" >
+					<ee:message >
+						
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	source__c: "HTTP/Postman",
+	target__c: "Database/MySql",
+	Mule_Flow_Name__c: flow.name,
+	Error_Code__c: vars.httpStatus,
+	Error_Message__c: error.description
+}]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:create doc:name="Create Error Log" doc:id="e4853bdd-cffa-4590-9fa9-ed7537695571" config-ref="Salesforce_Config" type="Cus_Error_Object__c"/>
 				<ee:transform doc:name="Transform Message" doc:id="213d8233-0a2f-4dc6-8ad2-397affc96735" >
 					<ee:message >
 						<ee:set-payload ><![CDATA[%dw 2.0
@@ -150,9 +200,26 @@ output application/json
 			</on-error-propagate>
 			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="5aa1ba0a-0717-42cf-b074-5238cd49ce3b" type="VALIDATION:EMPTY_COLLECTION">
 				<set-variable value="200" doc:name="httpStatus" doc:id="cb183221-0a63-4307-b3cf-47b24331ca88" variableName="httpStatus" />
-				<ee:transform doc:name="Transform Message" doc:id="d6f7587f-5bcf-4f60-8b5d-4a7d2eb887bb" >
+				<ee:transform doc:name="x-form input" doc:id="332a89f9-f10b-4280-9682-ade96275c465" >
 					<ee:message >
-						<ee:set-payload ><![CDATA[%dw 2.0
+						
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+[{
+	
+	source__c: "HTTP/Postman",
+	target__c: "Database/MySql",
+	Mule_Flow_Name__c: flow.name,
+	Error_Code__c: vars.httpStatus,
+	Error_Message__c: error.description
+}]]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<salesforce:create type="Cus_Error_Object__c" doc:name="Create Error Log" doc:id="d1300999-c03f-4825-8122-831794e1634e" config-ref="Salesforce_Config" />
+				<ee:transform doc:name="Transform Message" doc:id="d6f7587f-5bcf-4f60-8b5d-4a7d2eb887bb">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
 output application/json
 ---
 {
